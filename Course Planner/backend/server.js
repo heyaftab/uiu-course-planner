@@ -1,30 +1,36 @@
 const crypto = require('crypto');
 
-// We use process.env.KV_URL and process.env.KV_REST_API_TOKEN if available
-// Otherwise, we fall back to a simple in-memory map for the session
-// (Note: In-memory will reset on every cold start, but is better than failing)
 let memoryDb = {};
 
 async function getStudent(id) {
   if (process.env.KV_REST_API_TOKEN) {
-    const response = await fetch(`${process.env.KV_REST_API_URL}/get/${id}`, {
-      headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` }
-    });
-    return await response.json();
+    try {
+      const response = await fetch(`${process.env.KV_REST_API_URL}/get/${id}`, {
+        headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` }
+      });
+      return await response.json();
+    } catch (e) {
+      console.error('KV Get Error:', e);
+      return null;
+    }
   }
   return memoryDb[id];
 }
 
 async function setStudent(id, data) {
   if (process.env.KV_REST_API_TOKEN) {
-    await fetch(`${process.env.KV_REST_API_URL}/set`, {
-      method: 'POST',
-      headers: { 
-        Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ key: id, value: data })
-    });
+    try {
+      await fetch(`${process.env.KV_REST_API_URL}/set`, {
+        method: 'POST',
+        headers: { 
+          Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ key: id, value: data })
+      });
+    } catch (e) {
+      console.error('KV Set Error:', e);
+    }
   } else {
     memoryDb[id] = data;
   }
@@ -87,27 +93,34 @@ module.exports = async (req, res) => {
 
   try {
     const { body } = req;
-    const url = req.url || '';
+    const url = (req.url || '').toLowerCase();
 
-    if (req.method === 'GET' && (url === '/api' || url === '/')) {
-       sendHtml(res, 200, '<h1>Backend is running</h1><p>Database: ' + (process.env.KV_REST_API_TOKEN ? 'Vercel KV' : 'In-Memory (Temporary)') + '</p>');
+    // Flexible Route Matching
+    const isRoot = url === '/' || url === '/api';
+    const isInfo = url.endsWith('/info');
+    const isSignup = url.endsWith('/signup');
+    const isLogin = url.endsWith('/login');
+    const isProfile = url.endsWith('/profile');
+
+    if (req.method === 'GET' && isRoot) {
+       sendHtml(res, 200, '<h1 style="font-family:sans-serif">Backend is running</h1><p>Database: ' + (process.env.KV_REST_API_TOKEN ? 'Vercel KV' : 'In-Memory (Temporary)') + '</p>');
        return;
     }
-    if (req.method === 'GET' && (url === '/api/info' || url === '/info')) {
+    if (req.method === 'GET' && isInfo) {
       sendJson(res, 200, { name: 'UIU Course Planner API', status: 'running', db: process.env.KV_REST_API_TOKEN ? 'KV' : 'Memory' });
       return;
     }
 
-    if (req.method === 'POST' && (url === '/api/signup' || url === '/signup')) {
+    if (req.method === 'POST' && isSignup) {
       const { name, email, studentId, password } = body || {};
       const id = String(studentId || '').trim();
       if (!name || !isValidEmail(email) || !isValidUIUStudentId(id) || !password || password.length < 6) {
-        sendJson(res, 400, { error: 'Valid data required.' });
+        sendJson(res, 400, { error: 'Valid data required (Name, Email, 10-digit ID, Password min 6 chars).' });
         return;
       }
       const existing = await getStudent(id);
       if (existing) {
-        sendJson(res, 409, { error: 'Student ID exists.' });
+        sendJson(res, 409, { error: 'Student ID already exists.' });
         return;
       }
       const studentData = { id, name: String(name).trim(), email: String(email).trim(), passwordHash: hashPassword(password) };
@@ -116,24 +129,24 @@ module.exports = async (req, res) => {
       return;
     }
 
-    if (req.method === 'POST' && (url === '/api/login' || url === '/login')) {
+    if (req.method === 'POST' && isLogin) {
       const { studentId, password } = body || {};
       const id = String(studentId || '').trim();
       const student = await getStudent(id);
       if (!student || !verifyPassword(password || '', student.passwordHash)) {
-        sendJson(res, 401, { error: 'Invalid credentials.' });
+        sendJson(res, 401, { error: 'Invalid Student ID or password.' });
         return;
       }
       sendJson(res, 200, { student: publicStudent(student) });
       return;
     }
 
-    if (req.method === 'POST' && (url === '/api/profile' || url === '/profile')) {
+    if (req.method === 'POST' && isProfile) {
       const { studentId, name, phone = '', password = '', profilePhoto = '' } = body || {};
       const id = String(studentId || '').replace(/\D/g, '');
       const student = await getStudent(id);
       if (!student) {
-        sendJson(res, 404, { error: 'Not found.' });
+        sendJson(res, 404, { error: 'Student account not found.' });
         return;
       }
       student.name = String(name).trim();
@@ -145,8 +158,8 @@ module.exports = async (req, res) => {
       return;
     }
 
-    sendJson(res, 404, { error: 'Not found.' });
+    sendJson(res, 404, { error: `Route not found: ${url}` });
   } catch (error) {
-    sendJson(res, 500, { error: 'Server error: ' + error.message });
+    sendJson(res, 500, { error: 'Internal Server Error: ' + error.message });
   }
 };
