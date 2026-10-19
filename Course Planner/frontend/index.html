@@ -11,11 +11,177 @@
 <!-- TOAST CONTAINER -->
 <div class="toast-container" id="toastContainer"></div>
 
+<!-- LANDING VIEW -->
+<main class="landing-view" id="landingView">
+  <header class="landing-nav landing-enter">
+    <a class="landing-brand" href="#" aria-label="UIU Course Planner home">
+      <img class="landing-brand-icon" src="assets/course-planner-logo.png" alt="">
+      <span>
+        <strong>Course Planner</strong>
+        <small>UIU · B.Sc. in CSE</small>
+      </span>
+    </a>
+    <nav class="landing-nav-actions" aria-label="Site and account">
+      <a class="landing-link landing-nav-link" href="#planner-features">Features</a>
+      <a class="landing-link landing-nav-link" href="#how-it-works">How it works</a>
+      <a class="landing-link landing-nav-link" href="#planner-faq">FAQ</a>
+      <button class="theme-toggle landing-theme-toggle" id="landingThemeBtn" type="button" onclick="toggleTheme()" aria-label="Switch to light theme" title="Switch to light theme">🌙</button>
+      <button class="landing-link" type="button" onclick="showLoginPage()">Log in</button>
+      <button class="landing-button landing-button-small" type="button" onclick="showSignupPage()">Get started <span aria-hidden="true">→</span></button>
+    </nav>
+  </header>
+
+  <section class="landing-hero landing-enter">
+    <div class="landing-hero-copy">
+      <div class="landing-eyebrow"><span></span> MADE FOR UIU CSE STUDENTS</div>
+      <h1>Your degree,<br><span>mapped out.</span></h1>
+      <p class="landing-lede">Turn the UIU CSE curriculum into a practical degree roadmap. Organize courses by trimester, keep prerequisites in view, and see your credits and grades add up as you progress.</p>
+      <div class="landing-hero-actions">
+        <button class="landing-button" type="button" onclick="showSignupPage()">Build your plan <span aria-hidden="true">→</span></button>
+        <button class="landing-secondary-button" type="button" onclick="showLoginPage()">I already have an account</button>
+      </div>
+      <div class="landing-proof">
+        <span class="landing-proof-icon">✓</span>
+        <span>Your plan stays in this browser. No university sign-in required.</span>
+      </div>
+    </div>
+
+    <div class="landing-preview" aria-label="Preview of the course planning dashboard">
+      <div class="preview-glow"></div>
+      <div class="preview-window">
+        <div class="preview-topbar">
+          <div class="preview-brand"><img class="preview-brand-icon" src="assets/course-planner-logo.png" alt=""> My study plan</div>
+          <span class="preview-status"><i></i> PLAN PREVIEW</span>
+        </div>
+        <div class="preview-content">
+          <div class="preview-greeting">YOUR ACADEMIC OVERVIEW</div>
+          <h2>A little progress,<br>a lot of momentum.</h2>
+          <div class="preview-stats">
+            <div><strong>12</strong><span>trimesters</span></div>
+            <div><strong>58</strong><span>courses to plan</span></div>
+            <div><strong>4.00</strong><span>CGPA scale</span></div>
+          </div>
+          <div class="preview-plan-heading"><strong>Degree roadmap</strong><span>12 trimesters</span></div>
+          <div class="preview-roadmap" aria-hidden="true">
+            <span class="roadmap-done">01</span><i></i><span class="roadmap-done">02</span><i></i><span class="roadmap-active">03</span><i></i><span>04</span><i></i><span>05</span><i></i><span>06</span>
+          </div>
+          <div class="preview-course">
+            <span class="preview-course-icon">⌘</span>
+            <span><strong>CSE 1115</strong><small>Object Oriented Programming</small></span>
+            <span class="preview-course-tag">CORE</span>
+          </div>
+          <div class="preview-course">
+            <span class="preview-course-icon preview-course-icon-purple">∑</span>
+            <span><strong>MATH 2183</strong><small>Calculus and Linear Algebra</small></span>
+            <span class="preview-course-tag">3 CR</span>
+          </div>
+          <div class="preview-progress">
+            <div><strong>Degree progress</strong><span>Track courses and credits</span></div>
+            <span class="preview-progress-bar"><i></i></span>
+          </div>
+        </div>
+      </div>
+      <div class="preview-floating-card"><span>✦</span><div><strong>Your next step</strong><small>Plan one trimester at a time</small></div></div>
+    </div>
+  </section>
+
+  <section class="landing-facts" aria-label="Planner at a glance" data-reveal>
+    <div><strong>12</strong><span>curriculum trimesters</span></div>
+    <div><strong>58</strong><span>courses in the planner</span></div>
+    <div><strong>138</strong><span>curriculum credits shown</span></div>
+    <p>Based on the curriculum currently included in the planner. Always confirm official requirements with UIU.</p>
+  </section>
+
+  <section class="landing-features" id="planner-features" aria-labelledby="featuresHeading">
+    <div class="landing-section-heading" data-reveal>
+      <span>ONE CLEAR VIEW OF YOUR DEGREE</span>
+      <h2 id="featuresHeading">From course list to a plan you can follow.</h2>
+      <p>Useful tools for organizing your academic journey, whether you are mapping out a future trimester or updating what you have completed.</p>
+    </div>
+    <div class="landing-feature-grid">
+      <article class="landing-feature" data-reveal>
+        <span class="feature-icon feature-icon-blue">▦</span>
+        <h3>See the whole curriculum</h3>
+        <p>Browse the included CSE courses by trimester and category, with course codes, titles, credits, and listed prerequisites together.</p>
+      </article>
+      <article class="landing-feature" data-reveal>
+        <span class="feature-icon feature-icon-green">✓</span>
+        <h3>Make progress visible</h3>
+        <p>Mark courses complete and follow your completed courses, earned credits, remaining workload, and trimester progress.</p>
+      </article>
+      <article class="landing-feature" data-reveal>
+        <span class="feature-icon feature-icon-violet">↗</span>
+        <h3>Record grades and CGPA</h3>
+        <p>Add grades to completed courses and see a credit-weighted CGPA calculated from the grades you have recorded.</p>
+      </article>
+      <article class="landing-feature" data-reveal>
+        <span class="feature-icon feature-icon-blue">⌕</span>
+        <h3>Find courses quickly</h3>
+        <p>Search by course code or title, filter by category, and switch between list and grid views to find what you need.</p>
+      </article>
+      <article class="landing-feature" data-reveal>
+        <span class="feature-icon feature-icon-green">＋</span>
+        <h3>Adapt your roadmap</h3>
+        <p>Add custom courses, adjust your plan, and manage curriculum courses that do not match your individual path.</p>
+      </article>
+      <article class="landing-feature" data-reveal>
+        <span class="feature-icon feature-icon-violet">✦</span>
+        <h3>Ask the planner helper</h3>
+        <p>Get in-browser answers about your plan, listed prerequisites, and possible next courses based on your completion marks.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="landing-steps" id="how-it-works" aria-labelledby="stepsHeading">
+    <div class="landing-section-heading" data-reveal>
+      <span>GET STARTED IN MINUTES</span>
+      <h2 id="stepsHeading">A simple rhythm for staying on track.</h2>
+      <p>Start with the curriculum, then keep your roadmap current as your studies progress.</p>
+    </div>
+    <ol class="landing-step-grid">
+      <li data-reveal><span>01</span><div><h3>Create your planner account</h3><p>Set up an account for this planner using your student details. It does not verify credentials with UIU.</p></div></li>
+      <li data-reveal><span>02</span><div><h3>Review your trimesters</h3><p>Explore the course list, look up prerequisite information, and arrange the plan to fit your needs.</p></div></li>
+      <li data-reveal><span>03</span><div><h3>Update as you go</h3><p>Mark completed courses, enter grades, and check how your credits and progress change.</p></div></li>
+      <li data-reveal><span>04</span><div><h3>Keep a copy of your plan</h3><p>Export your planner data so you can keep a backup or refer to it outside the app.</p></div></li>
+    </ol>
+  </section>
+
+  <section class="landing-privacy" aria-label="Privacy and academic information" data-reveal>
+    <span class="privacy-icon" aria-hidden="true">⌂</span>
+    <div>
+      <h2>Your planner, your browser</h2>
+      <p>Planner accounts and progress are stored locally in the browser for this deployment. They do not automatically sync to another device, so export a backup if you need one. This is an independent planning tool, not an official UIU system or a substitute for academic advising.</p>
+    </div>
+  </section>
+
+  <section class="landing-faq" id="planner-faq" aria-labelledby="faqHeading">
+    <div class="landing-section-heading" data-reveal>
+      <span>GOOD TO KNOW</span>
+      <h2 id="faqHeading">A few quick answers.</h2>
+    </div>
+    <div class="landing-faq-list">
+      <details data-reveal><summary>Does this connect to my official UIU account?</summary><p>No. Create a separate planner account. The app does not verify your UIU password or connect to university systems.</p></details>
+      <details data-reveal><summary>Will my plan sync across my devices?</summary><p>No. This deployment stores planner data in the current browser. Use the export feature to save a copy, and take care before clearing browser data.</p></details>
+      <details data-reveal><summary>Are the course list and prerequisites official?</summary><p>The planner includes a course list and prerequisite information for guidance, but it may not reflect every curriculum update or individual requirement. Confirm decisions with official UIU resources or an academic advisor.</p></details>
+      <details data-reveal><summary>How is CGPA calculated?</summary><p>The planner computes a credit-weighted average from grades recorded for courses marked complete. It is a planning estimate based on the information you enter.</p></details>
+    </div>
+  </section>
+
+  <footer class="landing-footer" data-reveal>
+    <div><strong>Ready to make your roadmap?</strong><span>Start with one trimester. Keep building from there.</span></div>
+    <button class="landing-button" type="button" onclick="showSignupPage()">Start planning <span aria-hidden="true">→</span></button>
+  </footer>
+</main>
+
 <!-- AUTH VIEW -->
-<section class="auth-shell" id="authView">
+<section class="auth-shell" id="authView" hidden>
   <div class="auth-panel">
+    <div class="auth-top-actions">
+      <button class="auth-back" type="button" onclick="showLandingPage()">← Back to home</button>
+      <button class="theme-toggle" id="authThemeBtn" type="button" onclick="toggleTheme()" aria-label="Switch to light theme" title="Switch to light theme">🌙</button>
+    </div>
     <div class="auth-brand">
-      <div class="brand-icon">🎓</div>
+      <div class="brand-icon"><img src="assets/course-planner-logo.png" alt=""></div>
       <div>
         <div class="brand-title">Course Planner</div>
         <div class="brand-sub">United International University</div>
@@ -145,9 +311,9 @@
   <!-- TOPBAR -->
   <header class="topbar">
     <div style="display:flex;align-items:center;gap:10px">
-      <button class="mobile-nav-toggle" onclick="toggleSidebar()" id="mobileMenuBtn">☰</button>
+      <button class="mobile-nav-toggle" onclick="toggleSidebar()" id="mobileMenuBtn" type="button" aria-label="Hide sidebar" aria-controls="sidebar" aria-expanded="true" title="Hide sidebar">☰</button>
       <div class="topbar-brand">
-        <div class="brand-icon">🎓</div>
+        <div class="brand-icon"><img src="assets/course-planner-logo.png" alt=""></div>
         <div>
           <div class="brand-title">Course Planner</div>
           <div class="brand-sub">B.Sc. in CSE — UIU</div>
@@ -155,10 +321,6 @@
       </div>
     </div>
     <div class="topbar-right">
-      <div class="overall-gpa-badge">
-        <span>CGPA</span>
-        <span class="gpa-val" id="topbarGpa">—</span>
-      </div>
       <div class="cgpa-error-badge" id="cgpaErrorBadge" hidden>
         <span>!</span>
         Invalid CGPA
@@ -166,10 +328,16 @@
       <button class="icon-btn" onclick="openProfileModal()" title="Edit Profile">👤</button>
       <button class="student-badge" id="studentBadge" onclick="openAccountSwitcher()" title="Switch account">Student</button>
       <button class="icon-btn" onclick="exportData()" title="Export Data">💾</button>
-      <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle Theme">🌙</button>
+      <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Switch to light theme" aria-label="Switch to light theme">🌙</button>
       <button class="icon-btn" onclick="logoutStudent()" title="Logout">↪</button>
     </div>
   </header>
+
+  <aside class="notification-bar" id="plannerAnnouncement" aria-label="Planner tip">
+    <span class="notification-icon" aria-hidden="true">✦</span>
+    <p><strong>Planner tip</strong><span>Mark courses complete to keep your earned credits and CGPA up to date.</span></p>
+    <button type="button" onclick="dismissAnnouncement()" aria-label="Dismiss planner tip" title="Dismiss">×</button>
+  </aside>
 
   <!-- SIDEBAR -->
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -221,6 +389,35 @@
   <main class="main-content" id="mainContent">
     <!-- Content rendered by JS -->
   </main>
+
+  <section class="planner-chat" id="plannerChat" aria-label="Course Planner assistant">
+    <div class="planner-chat-panel" id="plannerChatPanel" hidden>
+      <header class="planner-chat-header">
+        <span class="planner-chat-avatar" aria-hidden="true">✦</span>
+        <div><strong>Planner assistant</strong><small>Private · answers stay in this browser</small></div>
+        <button type="button" onclick="togglePlannerChat()" aria-label="Close assistant" title="Close">×</button>
+      </header>
+      <div class="planner-chat-messages" id="plannerChatMessages" aria-live="polite" aria-relevant="additions">
+        <div class="planner-chat-message assistant">
+          <p>Hi! I can check your progress, look up courses and prerequisites, review a trimester, or suggest what to take next from your completion marks.</p>
+        </div>
+      </div>
+      <div class="planner-chat-suggestions" id="plannerChatSuggestions">
+        <button type="button" onclick="askPlannerAssistant('How is my progress?')">My progress</button>
+        <button type="button" onclick="askPlannerAssistant('What can I take next?')">What can I take next?</button>
+        <button type="button" onclick="askPlannerAssistant('What is the prerequisite for CSE 1115?')">Check a prerequisite</button>
+      </div>
+      <form class="planner-chat-form" onsubmit="sendPlannerMessage(event)">
+        <label class="sr-only" for="plannerChatInput">Ask the planner assistant</label>
+        <input id="plannerChatInput" type="text" maxlength="300" placeholder="Ask about your plan…" autocomplete="off" required>
+        <button type="submit" aria-label="Send message" title="Send">↑</button>
+      </form>
+      <p class="planner-chat-disclaimer">Context-aware, in-browser help · not an AI or academic advisor</p>
+    </div>
+    <button class="planner-chat-launcher" id="plannerChatLauncher" type="button" onclick="togglePlannerChat()" aria-controls="plannerChatPanel" aria-expanded="false">
+      <span aria-hidden="true">✦</span><span>Ask planner</span>
+    </button>
+  </section>
 </div>
 
 <script src="js/app.js"></script>

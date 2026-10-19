@@ -1,234 +1,311 @@
-# 🎓 UIU CSE Course Planner
+# UIU CSE Course Planner
 
-A web-based academic course planning application designed specifically for **Computer Science & Engineering (CSE) students of United International University (UIU)**.
+<!-- markdownlint-disable MD033 -->
 
-The application helps students organize their courses, plan upcoming trimesters, and keep track of their academic progress through a simple and user-friendly interface.
+<div align="center">
 
----
+<img src="https://capsule-render.vercel.app/api?type=venom&color=0:0f172a,40:1e3a8a,70:2563eb,100:06b6d4&height=260&section=header&text=UIU%20CSE%20Course%20Planner&fontSize=48&fontColor=ffffff&animation=twinkling&fontAlignY=38&desc=Plan%20smarter.%20Graduate%20faster.&descSize=20&descAlignY=58" alt="UIU CSE Course Planner banner" />
 
-## 🚀 Features
+[![Typing animation](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=900&color=38BDF8&center=true&vCenter=true&width=640&lines=Organize+your+courses+%F0%9F%93%9A;Map+out+every+trimester+%F0%9F%97%93%EF%B8%8F;Track+your+credits+%F0%9F%93%8A;Build+your+road+to+graduation+%F0%9F%8E%93)](https://github.com/heyaftab/uiu-course-planner)
 
-* 📚 **Course Management**
-  Browse and manage available CSE courses.
+**A web-based academic planner built for the CSE students of United International University.**
 
-* 🗓️ **Trimester Planning**
-  Plan courses across different trimesters according to your academic progress.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript" />
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5" />
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3" />
+</p>
 
-* 🎯 **Academic Planning**
-  Organize completed, ongoing, and planned courses.
+<p align="center">
+  <img src="https://img.shields.io/github/stars/heyaftab/uiu-course-planner?style=social" alt="Stars" />
+  <img src="https://img.shields.io/github/forks/heyaftab/uiu-course-planner?style=social" alt="Forks" />
+  <img src="https://img.shields.io/github/last-commit/heyaftab/uiu-course-planner?style=flat-square&color=22c55e&label=last%20commit" alt="Last commit" />
+  <img src="https://img.shields.io/github/repo-size/heyaftab/uiu-course-planner?style=flat-square&color=f97316" alt="Repo size" />
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PRs welcome" />
+  <img src="https://img.shields.io/badge/made%20for-UIU%20CSE-8b5cf6?style=flat-square" alt="Made for UIU CSE" />
+</p>
 
-* 🔍 **Course Search**
-  Quickly find courses using course codes or names.
+<p align="center">
+  <a href="#-features"><kbd> ✨ Features </kbd></a>
+  <a href="#-quick-start"><kbd> ⚡ Quick Start </kbd></a>
+  <a href="#-architecture"><kbd> 🏗️ Architecture </kbd></a>
+  <a href="#-roadmap"><kbd> 🔮 Roadmap </kbd></a>
+  <a href="#-faq"><kbd> ❓ FAQ </kbd></a>
+  <a href="#-contributing"><kbd> 🤝 Contribute </kbd></a>
+</p>
 
-* 📊 **Credit Tracking**
-  Keep track of completed and planned credits.
+</div>
 
-* 💾 **Data Persistence**
-  Course and planning data is stored using SQLite.
+<!--
+  📸 Add a screenshot or GIF at docs/preview.png, then uncomment:
 
-* ⚡ **Fast Backend**
-  Built with FastAPI for lightweight and high-performance API operations.
+<div align="center">
+  <img src="docs/preview.png" alt="App preview" width="88%" />
+</div>
+-->
 
-* 📱 **Responsive Interface**
-  Designed to work across desktop and mobile screen sizes.
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" alt="divider" />
 
----
+## 💡 Why this exists
 
-## 🛠️ Technology Stack
+> *"Which courses did I finish? What's left? What can I take next trimester?"*
 
-### Frontend
+Every UIU CSE student asks these questions every single trimester, and the answers usually live across spreadsheets, PDFs, and memory. **This planner puts everything in one place.**
 
-* HTML5
-* CSS3
-* JavaScript
-* Vanilla JavaScript
+<div align="center">
 
-### Backend
+| 📊 | 🗓️ | 🎓 |
+| :---: | :---: | :---: |
+| **Track** every credit | **Plan** every trimester | **Reach** graduation with a clear roadmap |
 
-* Python
-* FastAPI
+</div>
 
-### Database
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" alt="divider" />
 
-* SQLite
+## ✨ Features
 
-### Development Tools
+<table align="center">
+  <tr align="center">
+    <td width="25%" valign="top">
+      <h1 align="center">📚</h1>
+      <b align="center">Course Management</b><br/><br/>
+      Browse and manage every available CSE course.
+    </td>
+    <td width="25%" valign="top">
+      <h1 align="center">🗓️</h1>
+      <b align="center">Trimester Planning</b><br/><br/>
+      Lay out courses to match your academic progress.
+    </td>
+    <td width="25%" valign="top">
+      <h1 align="center">🎯</h1>
+      <b align="center">Academic Planning</b><br/><br/>
+      Separate completed, ongoing and planned courses.
+    </td>
+    <td width="25%" valign="top">
+      <h1 align="center">🔍</h1>
+      <b align="center">Instant Search</b><br/><br/>
+      Find any course by code or name in seconds.
+    </td>
+  </tr>
+  <tr align="center">
+    <td valign="top">
+      <h1 align="center">📊</h1>
+      <b align="center">Credit Tracking</b><br/><br/>
+      Live count of completed and planned credits.
+    </td>
+    <td valign="top">
+      <h1 align="center">💾</h1>
+      <b align="center">Persistence</b><br/><br/>
+      Course and planning data stored with SQLite.
+    </td>
+    <td valign="top">
+      <h1 align="center">⚡</h1>
+      <b align="center">Fast Backend</b><br/><br/>
+      Lightweight, high-performance FastAPI.
+    </td>
+    <td valign="top">
+      <h1 align="center">📱</h1>
+      <b align="center">Responsive UI</b><br/><br/>
+      Smooth on desktop and mobile screens.
+    </td>
+  </tr>
+</table>
 
-* Git
-* GitHub
-* REST API
-* VS Code
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" alt="divider" />
 
----
+## 🛠️ Tech Stack
 
-## 🏗️ Project Architecture
+<div align="center">
 
-The project follows a simple client-server architecture:
+<img src="https://skillicons.dev/icons?i=html,css,js,py,fastapi,sqlite,git,github,vscode&theme=dark" alt="Tech stack icons" />
 
-```text
-┌─────────────────────────┐
-│       Frontend          │
-│                         │
-│ HTML + CSS + JavaScript │
-└────────────┬────────────┘
-             │
-             │ HTTP / REST API
-             ▼
-┌─────────────────────────┐
-│        FastAPI          │
-│        Backend          │
-│                         │
-│ Python                  │
-└────────────┬────────────┘
-             │
-             │ Database Queries
-             ▼
-┌─────────────────────────┐
-│         SQLite          │
-│        Database         │
-└─────────────────────────┘
+</div>
+
+<br/>
+
+| Layer | Technologies |
+| :--- | :--- |
+| 🎨 **Frontend** | HTML5 · CSS3 · Vanilla JavaScript |
+| ⚙️ **Backend** | Python · FastAPI |
+| 🗄️ **Database** | SQLite |
+| 🧰 **Tooling** | Git · GitHub · REST API · VS Code |
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" alt="divider" />
+
+## 🏗️ Architecture
+
+```mermaid
+flowchart LR
+    U(["👩‍🎓 Student"]) --> A["🖥️ Frontend<br/>HTML · CSS · JS"]
+    A -- "HTTP / REST" --> B["⚡ FastAPI<br/>Python"]
+    B -- "SQL" --> C[("🗄️ SQLite<br/>course_planner.db")]
+    C -. "rows" .-> B
+    B -. "JSON" .-> A
+
+    style U fill:#8b5cf6,stroke:#5b21b6,color:#fff
+    style A fill:#2563eb,stroke:#1e3a8a,color:#fff
+    style B fill:#009688,stroke:#00695c,color:#fff
+    style C fill:#003b57,stroke:#00212f,color:#fff
 ```
 
----
+<details>
+<summary><b>📂 Project Structure</b> (click to expand)</summary>
 
-## 📂 Project Structure
+<br/>
 
 ```text
-uiu-cse-course-planner/
-│
-├── frontend/
+uiu-course-planner/
+├── 🎨 frontend/
 │   ├── index.html
 │   ├── style.css
 │   └── script.js
-│
-├── backend/
+├── ⚙️ backend/
 │   ├── main.py
 │   ├── database.py
 │   └── ...
-│
-├── database/
+├── 🗄️ database/
 │   └── course_planner.db
-│
-├── requirements.txt
-├── README.md
-└── .gitignore
+├── 📄 requirements.txt
+├── 📘 README.md
+└── 🚫 .gitignore
 ```
 
-> The exact structure may vary depending on the current implementation.
+> 💡 The exact structure may vary depending on the current implementation.
 
----
+</details>
 
-## ⚙️ Installation
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" alt="divider" />
 
-### 1. Clone the repository
+## ⚡ Quick Start
 
-```bash
-git clone https://github.com/heyaftab/uiu-cse-course-planner.git
-```
-
-### 2. Navigate to the project
+> **Requirements:** 🐍 Python 3.9+ and 🔧 Git
 
 ```bash
-cd uiu-cse-course-planner
-```
+# 1️⃣ Clone
+git clone https://github.com/heyaftab/uiu-course-planner.git
+cd uiu-course-planner
 
-### 3. Create a virtual environment
-
-```bash
+# 2️⃣ Create a virtual environment
 python3 -m venv venv
+
+# 3️⃣ Install dependencies (after activating, see below)
+pip install -r requirements.txt
+
+# 4️⃣ Launch 🚀
+uvicorn backend.main:app --reload
 ```
 
-Activate it on macOS/Linux:
+<table align="center">
+  <tr align="center">
+    <td><b>🍎 macOS / 🐧 Linux</b></td>
+    <td><b>🪟 Windows</b></td>
+  </tr>
+  <tr>
+    <td>
 
 ```bash
 source venv/bin/activate
 ```
 
-On Windows:
+</td>
+    <td>
 
 ```bash
 venv\Scripts\activate
 ```
 
-### 4. Install dependencies
+</td>
+  </tr>
+</table>
 
-```bash
-pip install -r requirements.txt
+Run the activation command **between steps 2 and 3**.
+
+| 🌐 Service | 🔗 URL |
+| :--- | :--- |
+| 🔌 API | <http://127.0.0.1:8000> |
+| 📖 Swagger docs | <http://127.0.0.1:8000/docs> |
+
+## ☁️ Deploy to Vercel
+
+The repository includes a `vercel.json` that publishes the static frontend from `Course Planner/frontend`. Import this repository into Vercel with the repository root as the **Root Directory** and the **Other** framework preset. The configured build command is a no-op; Vercel serves the frontend files directly.
+
+This static deployment uses browser `localStorage` for accounts and planner data. Data is limited to the current browser and does not sync between devices. The FastAPI backend stores accounts in a local JSON file and is not part of this Vercel deployment; use a persistent database and server-side authentication before offering shared or production accounts.
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" alt="divider" />
+
+## 🖥️ How to Use
+
+```mermaid
+flowchart LR
+    S1["🌐 Open app"] --> S2["📚 Browse courses"] --> S3["✅ Mark completed"] --> S4["➕ Add planned"] --> S5["🗓️ Sort by trimester"] --> S6["📊 Watch credits"] --> S7["🎓 Roadmap ready"]
+    style S1 fill:#2563eb,color:#fff,stroke:none
+    style S2 fill:#2563eb,color:#fff,stroke:none
+    style S3 fill:#16a34a,color:#fff,stroke:none
+    style S4 fill:#16a34a,color:#fff,stroke:none
+    style S5 fill:#f59e0b,color:#fff,stroke:none
+    style S6 fill:#f59e0b,color:#fff,stroke:none
+    style S7 fill:#8b5cf6,color:#fff,stroke:none
 ```
 
-### 5. Start the FastAPI server
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" alt="divider" />
 
-```bash
-uvicorn backend.main:app --reload
-```
+## 🎯 What It Keeps Track Of
 
-The API will normally be available at:
+<div align="center">
 
-```text
-http://127.0.0.1:8000
-```
+| ✅ Completed courses | 📋 Remaining courses | 🔗 Prerequisites |
+| :---: | :---: | :---: |
+| **🎓 Credit requirements** | **🗓️ Upcoming trimesters** | **📝 Planned courses** |
 
-FastAPI's interactive API documentation can be accessed at:
+</div>
 
-```text
-http://127.0.0.1:8000/docs
-```
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" alt="divider" />
 
----
+## 🔮 Roadmap
 
-## 🖥️ Usage
+| 🧠 Smart Planning | 📈 Progress & Insights | 👥 Community & Data | ☁️ Platform |
+| :--- | :--- | :--- | :--- |
+| ⬜ Prerequisite validation | ⬜ Degree progress visualization | ⬜ Faculty & section info | ⬜ Student authentication |
+| ⬜ Trimester recommendations | ⬜ CGPA calculation | ⬜ Course ratings & reviews | ⬜ Cloud database |
+| ⬜ Course conflict detection | | | ⬜ Mobile-friendly polish |
+| ⬜ Class schedule generation | | | ⬜ Production deployment |
 
-1. Open the application in your browser.
-2. Browse available CSE courses.
-3. Select the courses you have completed.
-4. Add courses you plan to take.
-5. Organize courses by trimester.
-6. Monitor your credit progress.
-7. Use the planner to build a suitable academic roadmap.
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" alt="divider" />
 
----
+## ❓ FAQ
 
-## 🎯 Purpose
+<details>
+<summary><b>Who is this for?</b></summary>
+<br/>
+Computer Science & Engineering students at United International University (UIU) who want a simple way to plan their degree.
+</details>
 
-The purpose of this project is to make academic planning easier for UIU CSE students.
+<details>
+<summary><b>Where is my data stored?</b></summary>
+<br/>
+Locally in a SQLite database file (<code>database/course_planner.db</code>). Nothing leaves your machine unless you deploy the app yourself.
+</details>
 
-Students often need to keep track of:
+<details>
+<summary><b>The API won't start. What now?</b></summary>
+<br/>
+Make sure your virtual environment is activated, dependencies are installed, and you run <code>uvicorn backend.main:app --reload</code> from the project root.
+</details>
 
-* Completed courses
-* Remaining courses
-* Course prerequisites
-* Credit requirements
-* Upcoming trimesters
-* Planned courses
+<details>
+<summary><b>Can I reuse this for another department?</b></summary>
+<br/>
+Yes, for educational purposes. Swap in a different course list and you're set.
+</details>
 
-This application brings these tasks into a single planning interface.
-
----
-
-## 🔮 Future Improvements
-
-Possible future improvements include:
-
-* [ ] Automatic prerequisite validation
-* [ ] Automatic trimester recommendations
-* [ ] Degree progress visualization
-* [ ] CGPA calculation
-* [ ] Course conflict detection
-* [ ] Class schedule generation
-* [ ] Faculty and section information
-* [ ] Course rating and review system
-* [ ] Student authentication
-* [ ] Cloud database support
-* [ ] Mobile-friendly improvements
-* [ ] Deployment as a production web application
-
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" alt="divider" />
 
 ## 🔐 Security
 
-Sensitive configuration files and credentials should not be committed to the repository.
-
-Make sure files such as the following are included in `.gitignore` when applicable:
+> ⚠️ Never commit credentials or sensitive configuration files.
 
 ```text
 .env
@@ -238,53 +315,54 @@ __pycache__/
 *.db
 ```
 
----
-
 ## 🤝 Contributing
 
-Contributions, suggestions, and improvements are welcome.
-
-If you would like to contribute:
-
-1. Fork the repository.
-2. Create a new branch.
+Contributions, ideas and bug reports are always welcome. 💙
 
 ```bash
-git checkout -b feature/your-feature
+git checkout -b feature/your-feature     # 🌿 branch
+git commit -m "Add your feature"         # 💾 commit
+git push origin feature/your-feature     # 🚀 push
 ```
 
-3. Make your changes.
-4. Commit your changes.
+Then open a **Pull Request**.
 
-```bash
-git commit -m "Add your feature"
-```
+<div align="center">
 
-5. Push the branch.
+<a href="https://github.com/heyaftab/uiu-course-planner/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=heyaftab/uiu-course-planner" alt="Contributors" />
+</a>
 
-```bash
-git push origin feature/your-feature
-```
-
-6. Open a Pull Request.
-
----
+</div>
 
 ## 📄 License
 
-This project is currently intended for educational and academic purposes.
+Currently intended for **educational and academic purposes**. To allow public reuse, consider adding an open-source license such as [MIT](https://choosealicense.com/licenses/mit/).
 
-If you plan to distribute or reuse the project publicly, consider adding an appropriate open-source license.
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" alt="divider" />
 
----
+<div align="center">
 
 ## 👨‍💻 Author
 
-**Aftab Uddin Ahmad**
+**Aftab Uddin Ahmad**<br/>
+Computer Science & Engineering · United International University
 
-Computer Science & Engineering
-United International University
+<a href="https://github.com/heyaftab"><img src="https://img.shields.io/badge/GitHub-heyaftab-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a>
+<a href="https://hey-aftab.lovable.app"><img src="https://img.shields.io/badge/Portfolio-hey--aftab-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Portfolio" /></a>
 
----
+<br/><br/>
 
-⭐ If you find this project useful, consider giving the repository a star.
+### ⭐ Star History
+
+<a href="https://star-history.com/#heyaftab/uiu-course-planner&Date">
+  <img src="https://api.star-history.com/svg?repos=heyaftab/uiu-course-planner&type=Date&theme=dark" alt="Star history" width="600" />
+</a>
+
+<br/>
+
+**If this project helped you, drop a star. It means a lot!** ⭐
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:06b6d4,50:2563eb,100:0f172a&height=140&section=footer" alt="footer" />
+
+</div>

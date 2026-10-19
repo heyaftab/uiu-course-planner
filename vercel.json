@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "echo 'Static frontend; no build step required'",
+  "outputDirectory": "Course Planner/frontend"
+}

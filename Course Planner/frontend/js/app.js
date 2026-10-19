@@ -20,6 +20,8 @@ const AUTH_USERS_KEY = 'uiu_cse_planner_students';
 const AUTH_SESSION_KEY = 'uiu_cse_planner_session';
 const AUTH_REMEMBERED_KEY = 'uiu_cse_planner_remembered_accounts';
 const LEGACY_PLANNER_KEY = 'uiu_cse_planner_v2';
+const THEME_STORAGE_KEY = 'uiu_cse_planner_theme';
+const ANNOUNCEMENT_DISMISSED_KEY = 'uiu_cse_planner_announcement_dismissed';
 const REQUIRED_COURSE_COUNT = 58;
 const DEFAULT_TRIMESTER_COUNT = 12;
 const API_BASE_URL = window.location.protocol === 'http:' || window.location.protocol === 'https:' ? '' : null;
@@ -245,15 +247,15 @@ function loadState() {
       state.removedCourseIds = data.removedCourseIds || {};
       state.trimesterCount = Math.max(DEFAULT_TRIMESTER_COUNT, Number(data.trimesterCount) || DEFAULT_TRIMESTER_COUNT);
       state.viewMode = data.viewMode || 'list';
-      state.theme = data.theme || 'dark';
+      state.theme = data.theme || state.theme;
       // Merge custom courses
       if (data.customCourses && data.customCourses.length > 0) {
         state.courses = [...JSON.parse(JSON.stringify(COURSE_DATA)), ...data.customCourses];
       }
     }
   } catch(e) { console.warn('Could not load state:', e); }
-  document.documentElement.setAttribute('data-theme', state.theme);
-  document.getElementById('themeBtn').textContent = state.theme === 'dark' ? '🌙' : '☀️';
+  state.theme = localStorage.getItem(THEME_STORAGE_KEY) || state.theme;
+  applyTheme();
 }
 
 function saveState() {
@@ -544,6 +546,10 @@ async function saveProfile() {
 }
 
 function showLoginPage() {
+  document.getElementById('landingView').hidden = true;
+  document.getElementById('landingView').style.display = 'none';
+  document.getElementById('authView').hidden = false;
+  document.getElementById('authView').style.display = '';
   document.getElementById('loginPage').hidden = false;
   document.getElementById('signupPage').hidden = true;
   document.getElementById('loginTab').classList.add('active');
@@ -551,10 +557,47 @@ function showLoginPage() {
 }
 
 function showSignupPage() {
+  document.getElementById('landingView').hidden = true;
+  document.getElementById('landingView').style.display = 'none';
+  document.getElementById('authView').hidden = false;
+  document.getElementById('authView').style.display = '';
   document.getElementById('loginPage').hidden = true;
   document.getElementById('signupPage').hidden = false;
   document.getElementById('loginTab').classList.remove('active');
   document.getElementById('signupTab').classList.add('active');
+}
+
+function showLandingPage() {
+  document.getElementById('landingView').hidden = false;
+  document.getElementById('landingView').style.display = '';
+  document.getElementById('authView').hidden = true;
+  document.getElementById('authView').style.display = 'none';
+  initializeLandingMotion();
+}
+
+let landingRevealObserver = null;
+
+function initializeLandingMotion() {
+  const landing = document.getElementById('landingView');
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  landing.classList.add('motion-ready');
+
+  const pending = [...landing.querySelectorAll('[data-reveal]:not(.is-visible)')];
+  if (!('IntersectionObserver' in window)) {
+    pending.forEach(element => element.classList.add('is-visible'));
+    return;
+  }
+
+  if (!landingRevealObserver) {
+    landingRevealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        landingRevealObserver.unobserve(entry.target);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -36px 0px' });
+  }
+  pending.forEach(element => landingRevealObserver.observe(element));
 }
 
 async function signupStudent(event) {
@@ -741,10 +784,8 @@ function logoutStudent() {
   localStorage.removeItem(AUTH_SESSION_KEY);
   state.activeStudent = null;
   document.getElementById('appWrapper').hidden = true;
-  document.getElementById('authView').hidden = false;
   document.getElementById('appWrapper').style.display = 'none';
-  document.getElementById('authView').style.display = '';
-  showLoginPage();
+  updateAuthUI();
   showToast('Logged out', 'info');
 }
 
@@ -847,9 +888,13 @@ function removeSavedAccountFromSwitcher(studentId) {
 
 function updateAuthUI() {
   const isLoggedIn = !!state.activeStudent;
-  document.getElementById('authView').hidden = isLoggedIn;
+  document.getElementById('landingView').hidden = isLoggedIn;
+  document.getElementById('authView').hidden = true;
   document.getElementById('appWrapper').hidden = !isLoggedIn;
-  document.getElementById('authView').style.display = isLoggedIn ? 'none' : '';
+  document.getElementById('plannerAnnouncement').hidden =
+    !isLoggedIn || localStorage.getItem(ANNOUNCEMENT_DISMISSED_KEY) === 'true';
+  document.getElementById('landingView').style.display = isLoggedIn ? 'none' : '';
+  document.getElementById('authView').style.display = 'none';
   document.getElementById('appWrapper').style.display = isLoggedIn ? 'grid' : 'none';
   if (isLoggedIn) {
     const savedCount = Object.keys(getRememberedAccounts()).length;
@@ -858,6 +903,8 @@ function updateAuthUI() {
 }
 
 function forceOpenDashboardShell(session) {
+  document.getElementById('landingView').hidden = true;
+  document.getElementById('landingView').style.display = 'none';
   document.getElementById('authView').hidden = true;
   document.getElementById('authView').style.display = 'none';
   document.getElementById('appWrapper').hidden = false;
@@ -1061,7 +1108,6 @@ function renderSidebar() {
   document.getElementById('ov_cdone').textContent = ov.doneCredits;
   const gpa = calcGPA();
   document.getElementById('ov_gpa').textContent = gpa || '—';
-  document.getElementById('topbarGpa').textContent = gpa || '—';
   updateCgpaErrorBadge();
 }
 
@@ -1534,9 +1580,6 @@ function setGrade(id, grade) {
   // update grade select style
   const sel = document.querySelector(`[data-id="${id}"] .grade-select`);
   if (sel) { sel.className = 'grade-select' + (grade !== 'none' ? ' graded' : ''); }
-  // update topbar gpa
-  const gpa = calcGPA();
-  document.getElementById('topbarGpa').textContent = gpa || '—';
   updateCgpaErrorBadge();
   refreshCourseContainer();
 }
@@ -2097,20 +2140,332 @@ function deleteCourse(id) {
 // ============================================================
 function toggleTheme() {
   state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(THEME_STORAGE_KEY, state.theme);
+  applyTheme();
+  if (state.activeStudent) saveState();
+}
+
+function dismissAnnouncement() {
+  localStorage.setItem(ANNOUNCEMENT_DISMISSED_KEY, 'true');
+  document.getElementById('plannerAnnouncement').hidden = true;
+}
+
+function applyTheme() {
   document.documentElement.setAttribute('data-theme', state.theme);
-  document.getElementById('themeBtn').textContent = state.theme === 'dark' ? '🌙' : '☀️';
-  saveState();
+  const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
+  const icon = state.theme === 'dark' ? '🌙' : '☀️';
+  ['themeBtn', 'landingThemeBtn', 'authThemeBtn'].forEach(id => {
+    const button = document.getElementById(id);
+    if (!button) return;
+    button.textContent = icon;
+    button.title = `Switch to ${nextTheme} theme`;
+    button.setAttribute('aria-label', `Switch to ${nextTheme} theme`);
+  });
+}
+
+function togglePlannerChat() {
+  const panel = document.getElementById('plannerChatPanel');
+  const launcher = document.getElementById('plannerChatLauncher');
+  const isOpening = panel.hidden;
+  panel.hidden = !isOpening;
+  launcher.setAttribute('aria-expanded', String(isOpening));
+  if (isOpening) document.getElementById('plannerChatInput').focus();
+}
+
+function appendPlannerChatMessage(role, message) {
+  const messages = document.getElementById('plannerChatMessages');
+  const messageEl = document.createElement('div');
+  messageEl.className = `planner-chat-message ${role}`;
+  const text = document.createElement('p');
+  text.textContent = message;
+  messageEl.appendChild(text);
+  messages.appendChild(messageEl);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+let lastPlannerAssistantCourseId = null;
+let lastPlannerAssistantTrimester = null;
+
+function normalizePlannerQuestion(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function findPlannerAssistantCourse(query, allowContext = false) {
+  const normalizedQuery = normalizePlannerQuestion(query);
+  const compactQuery = normalizedQuery.replace(/\s/g, '');
+  const courses = getActiveCourses();
+  const directMatch = courses.find(course =>
+    compactQuery.includes(course.code.toLowerCase().replace(/[^a-z0-9]/g, '')) ||
+    compactQuery.includes(course.id.toLowerCase().replace(/[^a-z0-9]/g, ''))
+  );
+  if (directMatch) return directMatch;
+
+  const exactMatch = courses.find(course =>
+    normalizedQuery.includes(normalizePlannerQuestion(course.title)) ||
+    normalizedQuery.includes(normalizePlannerQuestion(getDisplayName(course)))
+  );
+  if (exactMatch) return exactMatch;
+
+  if (allowContext && /\b(it|that|this|its|the course|those|them|they)\b/.test(normalizedQuery)) {
+    return courses.find(course => course.id === lastPlannerAssistantCourseId) || null;
+  }
+
+  const ignoredWords = new Set([
+    'about', 'course', 'courses', 'tell', 'show', 'what', 'which', 'where',
+    'when', 'does', 'have', 'has', 'with', 'from', 'this', 'that', 'for',
+    'the', 'and', 'are', 'was', 'were', 'how', 'can', 'could', 'would',
+    'please', 'give', 'details', 'detail', 'info', 'information', 'name',
+    'prerequisite', 'prerequisites', 'prereq', 'prereqs', 'credit', 'credits'
+  ]);
+  const queryWords = normalizedQuery.split(/\s+/).filter(word =>
+    word.length > 2 && !ignoredWords.has(word)
+  );
+  if (!queryWords.length) return null;
+
+  const ranked = courses.map(course => {
+    const courseWords = new Set(normalizePlannerQuestion(
+      `${course.code} ${course.title} ${getDisplayName(course)}`
+    ).split(/\s+/));
+    const matched = queryWords.filter(word => courseWords.has(word)).length;
+    return { course, score: matched / queryWords.length, matched };
+  }).filter(result => result.matched && result.score >= 0.6)
+    .sort((a, b) => b.score - a.score || b.matched - a.matched);
+
+  if (!ranked.length || (ranked.length > 1 && ranked[0].score === ranked[1].score)) return null;
+  return ranked[0].course;
+}
+
+function getPlannerCoursePrerequisites(course) {
+  if (!course.prereq) return [];
+  return course.prereq.split(',').map(code => code.trim()).filter(Boolean);
+}
+
+function isPlannerCoursePrerequisiteComplete(code) {
+  const normalizedCode = code.replace(/[^a-z0-9]/gi, '').toLowerCase();
+  const prerequisite = state.courses.find(course =>
+    course.code.replace(/[^a-z0-9]/gi, '').toLowerCase() === normalizedCode ||
+    course.id.replace(/[^a-z0-9]/gi, '').toLowerCase() === normalizedCode
+  );
+  return Boolean(prerequisite && state.completion[prerequisite.id] && !state.removedCourseIds[prerequisite.id]);
+}
+
+function formatPlannerCourse(course, includeTrimester = true) {
+  const status = state.completion[course.id] ? 'completed' : 'not completed';
+  const trimester = includeTrimester ? ` · ${getTrimesterLabel(course.trimester)}` : '';
+  return `${course.code} — ${getDisplayName(course)}${trimester} · ${course.credits} credits · ${status}`;
+}
+
+function getPlannerNextCourseSuggestions() {
+  const currentTrimester = state.currentView !== 'dashboard' && state.currentTrimester
+    ? state.currentTrimester
+    : null;
+  const pending = getActiveCourses().filter(course => !state.completion[course.id]);
+  const trimesters = [...new Set(pending.map(course => course.trimester))]
+    .filter(trimester => !currentTrimester || trimester > currentTrimester)
+    .sort((a, b) => a - b);
+
+  for (const trimester of trimesters) {
+    const courses = pending.filter(course => course.trimester === trimester);
+    const eligible = courses.filter(course =>
+      getPlannerCoursePrerequisites(course).every(isPlannerCoursePrerequisiteComplete)
+    );
+    if (eligible.length) return { trimester, courses: eligible.slice(0, 5), blockedCount: courses.length - eligible.length };
+  }
+  return null;
+}
+
+function getPlannerAssistantReply(question) {
+  const query = normalizePlannerQuestion(question);
+  const stats = getOverallStats();
+  const course = findPlannerAssistantCourse(question, true);
+  const trimesterMatch = query.match(/\b(?:trimester|term)\s*(\d{1,2})\b/);
+  const contextualTrimester = !trimesterMatch && lastPlannerAssistantTrimester &&
+    /\b(there|it|that|this|remaining|left)\b/.test(query);
+  const trimester = trimesterMatch
+    ? Number(trimesterMatch[1])
+    : (contextualTrimester ? lastPlannerAssistantTrimester : null);
+
+  if (/^(hi|hello|hey|good morning|good afternoon|good evening)\b/.test(query)) {
+    return 'Hi! I can look up your progress, explain course prerequisites, find courses, review a trimester, or suggest what to take next based on completed prerequisites. What are you working on?';
+  }
+
+  if (course && /\b(did i complete|have i completed|is .* complete|status of|mark(ed)? complete)\b/.test(query)) {
+    lastPlannerAssistantCourseId = course.id;
+    return `${formatPlannerCourse(course)}.${state.completion[course.id] ? ` ${state.grades[course.id] && state.grades[course.id] !== 'none' ? `Your recorded grade is ${state.grades[course.id]}.` : 'No grade is recorded yet.'}` : ' Mark it complete in the course list when you have finished it.'}`;
+  }
+
+  if (course && (
+    /\b(prerequisite|prerequisites|prereq|prereqs|before|need to take first)\b/.test(query) ||
+    (course.id === lastPlannerAssistantCourseId && /\b(those|them|they)\b/.test(query))
+  )) {
+    lastPlannerAssistantCourseId = course.id;
+    const prerequisites = getPlannerCoursePrerequisites(course);
+    if (!prerequisites.length) return `${course.code} — ${getDisplayName(course)} has no prerequisite listed in the planner.`;
+    const details = prerequisites.map(code =>
+      `${code} (${isPlannerCoursePrerequisiteComplete(code) ? 'complete' : 'not complete'})`
+    ).join(', ');
+    const missing = prerequisites.filter(code => !isPlannerCoursePrerequisiteComplete(code));
+    return `${course.code} — ${getDisplayName(course)} lists ${details} as prerequisite${prerequisites.length > 1 ? 's' : ''}.${missing.length ? ` Finish ${missing.join(' and ')} first according to the planner data.` : ' You have marked all listed prerequisites complete.'}`;
+  }
+
+  if (course && /\b(after|follow|comes next|next course)\b/.test(query)) {
+    lastPlannerAssistantCourseId = course.id;
+    const dependents = getActiveCourses().filter(item =>
+      item.id !== course.id &&
+      getPlannerCoursePrerequisites(item).some(code =>
+        code.replace(/[^a-z0-9]/gi, '').toLowerCase() === course.code.replace(/[^a-z0-9]/gi, '').toLowerCase()
+      )
+    ).sort((a, b) => a.trimester - b.trimester);
+    if (!dependents.length) return `The planner does not list any direct follow-on prerequisites for ${course.code} — ${getDisplayName(course)}.`;
+    const list = dependents.slice(0, 6).map(item =>
+      `${item.code} (${getDisplayName(item)}${state.completion[item.id] ? ', completed' : ''})`
+    ).join('; ');
+    return `Courses that directly list ${course.code} as a prerequisite include: ${list}${dependents.length > 6 ? `; and ${dependents.length - 6} more` : ''}. Check each course’s full prerequisites before planning it.`;
+  }
+
+  if (/\b(what should i take|what can i take|what do i take|next course|next trimester|recommend|suggest|eligible|available to take)\b/.test(query)) {
+    const suggestion = getPlannerNextCourseSuggestions();
+    if (!suggestion) return 'I could not find an upcoming incomplete course with all listed prerequisites marked complete. Check your course completion marks and prerequisites, or ask me to review a specific trimester.';
+    const names = suggestion.courses.map(item => `${item.code} (${getDisplayName(item)})`).join('; ');
+    const blocked = suggestion.blockedCount ? ` ${suggestion.blockedCount} other course${suggestion.blockedCount === 1 ? '' : 's'} in that trimester have prerequisite(s) not marked complete.` : '';
+    return `Based on the planner’s prerequisite list and your completion marks, start with ${getTrimesterLabel(suggestion.trimester)}: ${names}.${blocked} This is a planner suggestion, not an official registration or advising decision.`;
+  }
+
+  if (trimester !== null) {
+    if (trimester < 1 || trimester > getTrimesterCount()) {
+      return `Choose a trimester from 1 to ${getTrimesterCount()}.`;
+    }
+    lastPlannerAssistantTrimester = trimester;
+    const courses = getCoursesForTrimester(trimester);
+    if (!courses.length) return `${getTrimesterLabel(trimester)} has no active courses right now.`;
+    const pending = courses.filter(item => !state.completion[item.id]);
+    const done = courses.filter(item => state.completion[item.id]);
+    if (/\b(left|remaining|incomplete|not done|still need|pending)\b/.test(query)) {
+      const list = pending.slice(0, 7).map(item => `${item.code} (${getDisplayName(item)})`).join('; ');
+      return pending.length
+        ? `${getTrimesterLabel(trimester)} has ${pending.length} incomplete course${pending.length === 1 ? '' : 's'}: ${list}${pending.length > 7 ? `; and ${pending.length - 7} more` : ''}.`
+        : `All ${courses.length} active courses in ${getTrimesterLabel(trimester)} are marked complete.`;
+    }
+    if (/\b(completed|finished|done)\b/.test(query)) {
+      const list = done.map(item => `${item.code} (${getDisplayName(item)})`).join('; ');
+      return done.length
+        ? `You have marked ${done.length} of ${courses.length} courses in ${getTrimesterLabel(trimester)} complete: ${list}.`
+        : `You have not marked any courses in ${getTrimesterLabel(trimester)} complete yet.`;
+    }
+    const courseList = courses.slice(0, 7).map(item =>
+      `${item.code} ${getDisplayName(item)}${state.completion[item.id] ? ' (complete)' : ''}`
+    ).join('; ');
+    const rest = courses.length > 7 ? `; and ${courses.length - 7} more` : '';
+    return `${getTrimesterLabel(trimester)} has ${courses.length} courses and ${getTrimesterStats(trimester).totalCredits} credits: ${courseList}${rest}.`;
+  }
+
+  if (course && /\b(course|tell me|what is|details|credits?|status|about)\b/.test(query)) {
+    lastPlannerAssistantCourseId = course.id;
+    const prerequisites = getPlannerCoursePrerequisites(course);
+    const prerequisiteSummary = prerequisites.length
+      ? ` Listed prerequisite${prerequisites.length > 1 ? 's' : ''}: ${prerequisites.join(', ')}.`
+      : ' No prerequisite is listed.';
+    return `${formatPlannerCourse(course)}.${prerequisiteSummary}`;
+  }
+
+  if (/\b(progress|how am i doing|overall|degree progress)\b/.test(query)) {
+    const gpa = calcGPA();
+    return `You have marked ${stats.done} of ${stats.total} active courses complete (${stats.pct}%), earning ${stats.doneCredits} of ${stats.totalCredits} active credits. ${stats.remaining} courses remain incomplete.${gpa ? ` Your grade-weighted CGPA from completed courses with grades is ${gpa}.` : ' A CGPA will appear after completed courses have grades recorded.'}`;
+  }
+
+  if (/\b(completed courses|courses completed|finished courses|courses left|remaining courses|incomplete courses|how many courses|courses have i completed|courses have i finished)\b/.test(query)) {
+    const completed = getActiveCourses().filter(item => state.completion[item.id]);
+    const incomplete = getActiveCourses().filter(item => !state.completion[item.id]);
+    const wantsCompleted = /\b(completed|finished)\b/.test(query);
+    const list = (wantsCompleted ? completed : incomplete).slice(0, 8)
+      .map(item => `${item.code} (${getDisplayName(item)})`).join('; ');
+    const selected = wantsCompleted ? completed : incomplete;
+    const label = wantsCompleted ? 'completed' : 'incomplete';
+    return `You have ${selected.length} ${label} courses.${selected.length ? ` ${wantsCompleted ? 'Completed' : 'Still to complete'}: ${list}${selected.length > 8 ? `; and ${selected.length - 8} more` : ''}.` : ''}`;
+  }
+
+  if (/\b(cgpa|gpa|grade point average|grade|grading)\b/.test(query)) {
+    const gpa = calcGPA();
+    const gradedCredits = getActiveCourses().reduce((sum, item) =>
+      state.completion[item.id] && getGradePoint(state.grades[item.id]) !== null ? sum + item.credits : sum, 0);
+    return `The planner calculates CGPA as the credit-weighted average of grades recorded for completed courses. ${gpa ? `Your current calculated CGPA is ${gpa}, based on ${gradedCredits} graded credits.` : 'There are no completed courses with a recorded grade yet.'} Mark a course complete and choose its grade on the course card to include it.`;
+  }
+
+  if (/\b(credit|credits)\b/.test(query)) {
+    return `Your plan contains ${stats.totalCredits} active credits: ${stats.doneCredits} earned from completed courses and ${stats.totalCredits - stats.doneCredits} remaining. ${stats.doneCredits} credits are counted as earned only when a course is marked complete.`;
+  }
+
+  const category = Object.entries(CAT_LABELS).find(([key, label]) =>
+    query.includes(normalizePlannerQuestion(label)) || query.includes(key)
+  );
+  if (category && /\b(course|courses|show|list|which)\b/.test(query)) {
+    const categoryCourses = getActiveCourses().filter(item => item.cat === category[0]);
+    const list = categoryCourses.slice(0, 8)
+      .map(item => `${item.code} (${getDisplayName(item)})`).join('; ');
+    return `${category[1]} includes ${categoryCourses.length} active courses${list ? `: ${list}${categoryCourses.length > 8 ? `; and ${categoryCourses.length - 8} more` : ''}` : ''}.`;
+  }
+
+  if (course) {
+    lastPlannerAssistantCourseId = course.id;
+    const prerequisites = getPlannerCoursePrerequisites(course);
+    return `${formatPlannerCourse(course)}.${prerequisites.length ? ` Listed prerequisite${prerequisites.length > 1 ? 's' : ''}: ${prerequisites.join(', ')}.` : ' No prerequisite is listed in the planner.'}`;
+  }
+
+  if (/\b(search|find|look up|which course|courses about|course in)\b/.test(query)) {
+    return 'I can search the curriculum by a course code or distinctive title words. Try “Artificial Intelligence”, “CSE 1115”, or “courses in trimester 4”.';
+  }
+
+  if (/\b(help|use|start|planner|feature|how)\b/.test(query)) {
+    return 'I can summarize your progress and credits, calculate your recorded CGPA, list courses in a trimester, check a course’s completion and listed prerequisites, search course titles, and suggest the next curriculum trimester with courses whose listed prerequisites are marked complete. Use the sidebar to browse, mark courses complete, record grades, add custom courses, and export your plan.';
+  }
+
+  return 'I could not confidently match that to the planner data. Try asking about your progress, “What courses are left in trimester 4?”, “What is the prerequisite for CSE 1115?”, or “What can I take next?”.';
+}
+
+function sendPlannerMessage(event) {
+  event.preventDefault();
+  const input = document.getElementById('plannerChatInput');
+  const question = input.value.trim();
+  if (!question) return;
+  input.value = '';
+  askPlannerAssistant(question);
+}
+
+function askPlannerAssistant(question) {
+  appendPlannerChatMessage('user', question);
+  document.getElementById('plannerChatSuggestions').hidden = true;
+  appendPlannerChatMessage('assistant', getPlannerAssistantReply(question));
 }
 
 function toggleSidebar() {
+  const app = document.getElementById('appWrapper');
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebarOverlay');
-  sidebar.classList.toggle('open');
-  overlay.classList.toggle('open');
+  const button = document.getElementById('mobileMenuBtn');
+
+  if (window.matchMedia('(max-width: 700px)').matches) {
+    const isOpen = sidebar.classList.toggle('open');
+    overlay.classList.toggle('open', isOpen);
+    button.setAttribute('aria-expanded', String(isOpen));
+    button.setAttribute('aria-label', isOpen ? 'Hide sidebar' : 'Show sidebar');
+    button.title = isOpen ? 'Hide sidebar' : 'Show sidebar';
+    return;
+  }
+
+  const isCollapsed = app.classList.toggle('sidebar-collapsed');
+  button.setAttribute('aria-expanded', String(!isCollapsed));
+  button.setAttribute('aria-label', isCollapsed ? 'Show sidebar' : 'Hide sidebar');
+  button.title = isCollapsed ? 'Show sidebar' : 'Hide sidebar';
 }
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebarOverlay').classList.remove('open');
+  const button = document.getElementById('mobileMenuBtn');
+  const isExpanded = !window.matchMedia('(max-width: 700px)').matches &&
+    !document.getElementById('appWrapper').classList.contains('sidebar-collapsed');
+  button.setAttribute('aria-expanded', String(isExpanded));
+  button.setAttribute('aria-label', isExpanded ? 'Hide sidebar' : 'Show sidebar');
+  button.title = isExpanded ? 'Hide sidebar' : 'Show sidebar';
 }
 
 function exportData() {
@@ -2174,10 +2529,12 @@ function startPlanner() {
 }
 
 function init() {
+  state.theme = localStorage.getItem(THEME_STORAGE_KEY) || state.theme;
+  applyTheme();
   const session = getActiveStudent();
   if (!session) {
     updateAuthUI();
-    showLoginPage();
+    showLandingPage();
     return;
   }
   state.activeStudent = session;
