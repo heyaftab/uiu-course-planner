@@ -1,6 +1,28 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "buildCommand": "echo 'Static frontend; no build step required'",
-  "outputDirectory": "Course Planner/frontend"
+  "services": {
+    "frontend": {
+      "root": "Course Planner/frontend",
+      "framework": "static"
+    },
+    "backend": {
+      "root": "Course Planner/backend",
+      "runtime": "nodejs18",
+      "entrypoint": "server.js"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "frontend"
+      }
+    }
+  ]
 }

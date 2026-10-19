@@ -24,7 +24,7 @@ const THEME_STORAGE_KEY = 'uiu_cse_planner_theme';
 const ANNOUNCEMENT_DISMISSED_KEY = 'uiu_cse_planner_announcement_dismissed';
 const REQUIRED_COURSE_COUNT = 58;
 const DEFAULT_TRIMESTER_COUNT = 12;
-const API_BASE_URL = window.location.protocol === 'http:' || window.location.protocol === 'https:' ? '' : null;
+const API_BASE_URL = '/api';
 
 const COURSE_DATA = [
   // TRIMESTER 1
