@@ -6,7 +6,6 @@
     },
     "backend": {
       "root": "Course Planner/backend",
-      "runtime": "nodejs18",
       "entrypoint": "server.js"
     }
   },
