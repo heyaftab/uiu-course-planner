@@ -1,8 +1,13 @@
 {
   "name": "uiu-course-planner-backend",
   "version": "1.0.0",
-  "private": true,
+  "description": "Backend for UIU Course Planner",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
