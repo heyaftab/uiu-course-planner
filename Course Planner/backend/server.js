@@ -6,8 +6,8 @@ const path = require('path');
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(__dirname, 'data');
 const STUDENTS_FILE = path.join(DATA_DIR, 'students.json');
+const FRONTEND_DIR = path.join(__dirname, '../frontend');
 
-// --- Persistence Logic (Local File for Railway) ---
 function ensureDataFile() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   if (!fs.existsSync(STUDENTS_FILE)) fs.writeFileSync(STUDENTS_FILE, '{}');
@@ -23,7 +23,6 @@ function writeStudents(students) {
   fs.writeFileSync(STUDENTS_FILE, JSON.stringify(students, null, 2));
 }
 
-// --- Helpers ---
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let body = '';
@@ -58,77 +57,101 @@ function verifyPassword(password, savedHash) {
   return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(candidate, 'hex'));
 }
 
-// --- Server Logic ---
+// helper to serve static files
+function serveFile(res, filePath, contentType) {
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      res.writeHead(404);
+      res.end('Not Found');
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': contentType });
+    res.end(data);
+  });
+}
+
 const server = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') {
     sendJson(res, 204, {});
     return;
   }
 
-  try {
-    const url = req.url || '';
-    
-    if (req.method === 'GET' && (url === '/api' || url === '/api/info')) {
-      sendJson(res, 200, { name: 'UIU Course Planner API', status: 'running', mode: 'Railway' });
-      return;
-    }
+  const url = req.url || '';
 
-    if (req.method === 'POST' && url === '/api/signup') {
-      const { name, email, studentId, password } = await readBody(req);
-      const id = String(studentId || '').trim();
-      if (!name || !isValidEmail(email) || !isValidUIUStudentId(id) || !password || password.length < 6) {
-        sendJson(res, 400, { error: 'Invalid input data.' });
+  // 1. Handle API Routes
+  if (url.startsWith('/api')) {
+    try {
+      if (req.method === 'GET' && (url === '/api' || url === '/api/info')) {
+        sendJson(res, 200, { name: 'UIU Course Planner API', status: 'running', mode: 'Railway-Full' });
         return;
       }
-      const students = readStudents();
-      if (students[id]) {
-        sendJson(res, 409, { error: 'Student ID exists.' });
+      if (req.method === 'POST' && url === '/api/signup') {
+        const { name, email, studentId, password } = await readBody(req);
+        const id = String(studentId || '').trim();
+        if (!name || !isValidEmail(email) || !isValidUIUStudentId(id) || !password || password.length < 6) {
+          sendJson(res, 400, { error: 'Invalid input data.' });
+          return;
+        }
+        const students = readStudents();
+        if (students[id]) {
+          sendJson(res, 409, { error: 'Student ID exists.' });
+          return;
+        }
+        students[id] = { id, name, email, passwordHash: hashPassword(password) };
+        writeStudents(students);
+        sendJson(res, 201, { student: { id, name } });
         return;
       }
-      students[id] = { id, name, email, passwordHash: hashPassword(password) };
-      writeStudents(students);
-      sendJson(res, 201, { student: { id, name } });
-      return;
-    }
-
-    if (req.method === 'POST' && url === '/api/login') {
-      const { studentId, password } = await readBody(req);
-      const id = String(studentId || '').trim();
-      const students = readStudents();
-      const student = students[id];
-      if (!student || !verifyPassword(password || '', student.passwordHash)) {
-        sendJson(res, 401, { error: 'Invalid credentials.' });
+      if (req.method === 'POST' && url === '/api/login') {
+        const { studentId, password } = await readBody(req);
+        const id = String(studentId || '').trim();
+        const students = readStudents();
+        const student = students[id];
+        if (!student || !verifyPassword(password || '', student.passwordHash)) {
+          sendJson(res, 401, { error: 'Invalid credentials.' });
+          return;
+        }
+        sendJson(res, 200, { student: { id: student.id, name: student.name } });
         return;
       }
-      sendJson(res, 200, { student: { id: student.id, name: student.name } });
-      return;
-    }
-
-    if (req.method === 'POST' && url === '/api/profile') {
-      const { studentId, name, phone, password, profilePhoto } = await readBody(req);
-      const id = String(studentId || '').replace(/\D/g, '');
-      const students = readStudents();
-      const student = students[id];
-      if (!student) {
-        sendJson(res, 404, { error: 'Not found.' });
+      if (req.method === 'POST' && url === '/api/profile') {
+        const { studentId, name, phone, password, profilePhoto } = await readBody(req);
+        const id = String(studentId || '').replace(/\D/g, '');
+        const students = readStudents();
+        const student = students[id];
+        if (!student) {
+          sendJson(res, 404, { error: 'Not found.' });
+          return;
+        }
+        if (name) student.name = name;
+        if (phone) student.phone = phone;
+        if (profilePhoto) student.profilePhoto = profilePhoto;
+        if (password) student.passwordHash = hashPassword(password);
+        students[id] = student;
+        writeStudents(students);
+        sendJson(res, 200, { student });
         return;
       }
-      if (name) student.name = name;
-      if (phone) student.phone = phone;
-      if (profilePhoto) student.profilePhoto = profilePhoto;
-      if (password) student.passwordHash = hashPassword(password);
-      students[id] = student;
-      writeStudents(students);
-      sendJson(res, 200, { student });
-      return;
+      sendJson(res, 404, { error: 'API Route not found' });
+    } catch (e) {
+      sendJson(res, 500, { error: e.message });
     }
-
-    sendJson(res, 404, { error: 'Not found' });
-  } catch (e) {
-    sendJson(res, 500, { error: e.message });
+    return;
   }
+
+  // 2. Handle Static Frontend Files
+  let filePath = path.join(FRONTEND_DIR, url === '/' ? 'index.html' : url);
+  
+  // Determine content type
+  let contentType = 'text/html';
+  if (filePath.endsWith('.js')) contentType = 'application/javascript';
+  else if (filePath.endsWith('.css')) contentType = 'text/css';
+  else if (filePath.endsWith('.png')) contentType = 'image/png';
+  else if (filePath.endsWith('.jpg')) contentType = 'image/jpeg';
+
+  serveFile(res, filePath, contentType);
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Railway Backend running on port ${PORT}`);
+  console.log(`Railway Full-Stack Server running on port ${PORT}`);
 });
