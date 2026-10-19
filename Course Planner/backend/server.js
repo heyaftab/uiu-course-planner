@@ -1,31 +1,47 @@
+const http = require('http');
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
-const CONVEX_URL = 'https://graceful-blackbird-506.convex.cloud';
-const CONVEX_TOKEN = 'prod:graceful-blackbirds-56leJ2M1I6IBlG0WlGTzR0NGUSONJWYWMQ4ZjhemnZIn';
+const PORT = process.env.PORT || 3000;
+const DATA_DIR = path.join(__dirname, 'data');
+const STUDENTS_FILE = path.join(DATA_DIR, 'students.json');
 
-async function callConvex(functionName, args = {}) {
-  try {
-    const response = await fetch(`${CONVEX_URL}/api/functions/students/${functionName}`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${CONVEX_TOKEN}`
-      },
-      body: JSON.stringify(args)
+// --- Persistence Logic (Local File for Railway) ---
+function ensureDataFile() {
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(STUDENTS_FILE)) fs.writeFileSync(STUDENTS_FILE, '{}');
+}
+
+function readStudents() {
+  ensureDataFile();
+  return JSON.parse(fs.readFileSync(STUDENTS_FILE, 'utf8'));
+}
+
+function writeStudents(students) {
+  ensureDataFile();
+  fs.writeFileSync(STUDENTS_FILE, JSON.stringify(students, null, 2));
+}
+
+// --- Helpers ---
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try { resolve(body ? JSON.parse(body) : {}); } 
+      catch (e) { reject(e); }
     });
-    const data = await response.json();
-    return data;
-  } catch (e) {
-    console.error('Convex Error:', e);
-    return null;
-  }
+  });
 }
 
 function sendJson(res, status, payload) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.writeHead(status, { 'Content-Type': 'application/json' });
+  res.writeHead(status, {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  });
   res.end(JSON.stringify(payload));
 }
 
@@ -42,40 +58,44 @@ function verifyPassword(password, savedHash) {
   return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(candidate, 'hex'));
 }
 
-module.exports = async (req, res) => {
+// --- Server Logic ---
+const server = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') {
     sendJson(res, 204, {});
     return;
   }
 
   try {
-    const body = req.body;
-    const url = (req.url || '').toLowerCase();
-
-    if (url.includes('info')) {
-      sendJson(res, 200, { name: 'UIU Course Planner API', status: 'running', db: 'Convex' });
+    const url = req.url || '';
+    
+    if (req.method === 'GET' && (url === '/api' || url === '/api/info')) {
+      sendJson(res, 200, { name: 'UIU Course Planner API', status: 'running', mode: 'Railway' });
       return;
     }
-    if (url.includes('signup')) {
-      const { name, email, studentId, password } = body || {};
+
+    if (req.method === 'POST' && url === '/api/signup') {
+      const { name, email, studentId, password } = await readBody(req);
       const id = String(studentId || '').trim();
       if (!name || !isValidEmail(email) || !isValidUIUStudentId(id) || !password || password.length < 6) {
         sendJson(res, 400, { error: 'Invalid input data.' });
         return;
       }
-      const existing = await callConvex('getById', { id });
-      if (existing) {
-        sendJson(res, 409, { error: 'Student ID already exists.' });
+      const students = readStudents();
+      if (students[id]) {
+        sendJson(res, 409, { error: 'Student ID exists.' });
         return;
       }
-      await callConvex('create', { id, name, email, passwordHash: hashPassword(password) });
+      students[id] = { id, name, email, passwordHash: hashPassword(password) };
+      writeStudents(students);
       sendJson(res, 201, { student: { id, name } });
       return;
     }
-    if (url.includes('login')) {
-      const { studentId, password } = body || {};
+
+    if (req.method === 'POST' && url === '/api/login') {
+      const { studentId, password } = await readBody(req);
       const id = String(studentId || '').trim();
-      const student = await callConvex('getById', { id });
+      const students = readStudents();
+      const student = students[id];
       if (!student || !verifyPassword(password || '', student.passwordHash)) {
         sendJson(res, 401, { error: 'Invalid credentials.' });
         return;
@@ -83,25 +103,32 @@ module.exports = async (req, res) => {
       sendJson(res, 200, { student: { id: student.id, name: student.name } });
       return;
     }
-    if (url.includes('profile')) {
-      const { studentId, name, phone, password, profilePhoto } = body || {};
+
+    if (req.method === 'POST' && url === '/api/profile') {
+      const { studentId, name, phone, password, profilePhoto } = await readBody(req);
       const id = String(studentId || '').replace(/\D/g, '');
-      const student = await callConvex('getById', { id });
+      const students = readStudents();
+      const student = students[id];
       if (!student) {
         sendJson(res, 404, { error: 'Not found.' });
         return;
       }
-      const updates = {};
-      if (name) updates.name = name;
-      if (phone) updates.phone = phone;
-      if (profilePhoto) updates.profilePhoto = profilePhoto;
-      if (password) updates.passwordHash = hashPassword(password);
-      await callConvex('update', { id, ...updates });
-      sendJson(res, 200, { student: { ...student, ...updates } });
+      if (name) student.name = name;
+      if (phone) student.phone = phone;
+      if (profilePhoto) student.profilePhoto = profilePhoto;
+      if (password) student.passwordHash = hashPassword(password);
+      students[id] = student;
+      writeStudents(students);
+      sendJson(res, 200, { student });
       return;
     }
+
     sendJson(res, 404, { error: 'Not found' });
   } catch (e) {
-    sendJson(res, 500, { error: 'Internal Server Error: ' + e.message });
+    sendJson(res, 500, { error: e.message });
   }
-};
+});
+
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Railway Backend running on port ${PORT}`);
+});
