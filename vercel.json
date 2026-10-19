@@ -1,26 +1,12 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "services": {
-    "frontend": {
-      "root": "Course Planner/frontend"
-    },
-    "backend": {
-      "root": "Course Planner/backend",
-      "entrypoint": "server.js"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": {
-        "service": "backend"
-      }
+      "destination": "/Course Planner/backend/server.js"
     },
     {
       "source": "/(.*)",
-      "destination": {
-        "service": "frontend"
-      }
+      "destination": "/Course Planner/frontend/$1"
     }
   ]
 }
