@@ -3,6 +3,8 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
+// IMPORTANT: Railway provides the PORT environment variable.
+// We MUST use process.env.PORT for Railway to route traffic to us.
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(__dirname, 'data');
 const STUDENTS_FILE = path.join(DATA_DIR, 'students.json');
@@ -57,12 +59,11 @@ function verifyPassword(password, savedHash) {
   return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(candidate, 'hex'));
 }
 
-// helper to serve static files
 function serveFile(res, filePath, contentType) {
   fs.readFile(filePath, (err, data) => {
     if (err) {
       res.writeHead(404);
-      res.end('Not Found');
+      res.end('File Not Found: ' + filePath);
       return;
     }
     res.writeHead(200, { 'Content-Type': contentType });
@@ -78,11 +79,11 @@ const server = http.createServer(async (req, res) => {
 
   const url = req.url || '';
 
-  // 1. Handle API Routes
+  // 1. API Routes
   if (url.startsWith('/api')) {
     try {
       if (req.method === 'GET' && (url === '/api' || url === '/api/info')) {
-        sendJson(res, 200, { name: 'UIU Course Planner API', status: 'running', mode: 'Railway-Full' });
+        sendJson(res, 200, { name: 'UIU Course Planner API', status: 'running', port: PORT });
         return;
       }
       if (req.method === 'POST' && url === '/api/signup') {
@@ -139,19 +140,20 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // 2. Handle Static Frontend Files
-  let filePath = path.join(FRONTEND_DIR, url === '/' ? 'index.html' : url);
+  // 2. Static Frontend Files
+  let relativePath = url === '/' ? 'index.html' : url;
+  let filePath = path.join(FRONTEND_DIR, relativePath);
   
-  // Determine content type
   let contentType = 'text/html';
   if (filePath.endsWith('.js')) contentType = 'application/javascript';
   else if (filePath.endsWith('.css')) contentType = 'text/css';
   else if (filePath.endsWith('.png')) contentType = 'image/png';
   else if (filePath.endsWith('.jpg')) contentType = 'image/jpeg';
+  else if (filePath.endsWith('.svg')) contentType = 'image/svg+xml';
 
   serveFile(res, filePath, contentType);
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Railway Full-Stack Server running on port ${PORT}`);
+  console.log(`Server is listening on port ${PORT}`);
 });
