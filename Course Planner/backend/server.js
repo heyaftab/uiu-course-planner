@@ -6,7 +6,9 @@ const path = require('path');
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(__dirname, 'data');
 const STUDENTS_FILE = path.join(DATA_DIR, 'students.json');
-const FRONTEND_DIR = path.resolve(__dirname, '..', 'frontend');
+
+// FIXED: Ensure we point exactly to where the frontend folder is relative to this file
+const FRONTEND_DIR = path.join(__dirname, '..', 'frontend');
 
 function ensureDataFile() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -59,7 +61,9 @@ function serveFile(res, filePath, contentType) {
   fs.readFile(filePath, (err, data) => {
     if (err) {
       res.writeHead(404);
-      res.end('File Not Found on Server: ' + filePath);
+      // Log the actual path to console for debugging in Railway logs
+      console.error('File Not Found: ' + filePath);
+      res.end('File Not Found: ' + filePath);
       return;
     }
     res.writeHead(200, { 'Content-Type': contentType });
@@ -135,12 +139,17 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // --- FRONTEND ROUTING ---
+  // 1. Handle the root path
   let relativePath = url === '/' ? 'index.html' : url;
+  
+  // 2. Remove leading slash to prevent path.join from treating it as an absolute root path
   if (relativePath.startsWith('/')) {
     relativePath = relativePath.substring(1);
   }
   
-  let filePath = path.join(FRONTEND_DIR, relativePath);
+  // 3. Combine with the absolute path to the frontend folder
+  const filePath = path.join(FRONTEND_DIR, relativePath);
   
   let contentType = 'text/html';
   if (filePath.endsWith('.js')) contentType = 'application/javascript';
