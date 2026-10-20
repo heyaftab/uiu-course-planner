@@ -98,7 +98,6 @@ const server = http.createServer(async (req, res) => {
         sendJson(res, 201, { student: { id, name } });
         return;
       }
-      if (req.// API Routes
       if (req.method === 'POST' && url === '/api/login') {
         const { studentId, password } = await readBody(req);
         const id = String(studentId || '').trim();
