@@ -228,11 +228,11 @@ Run the activation command **between steps 2 and 3**.
 | 🔌 API | <http://127.0.0.1:8000> |
 | 📖 Swagger docs | <http://127.0.0.1:8000/docs> |
 
-## ☁️ Deploy to Vercel
+## ☁️ Free static hosting with GitHub Pages
 
-The repository includes a `vercel.json` that publishes the static frontend from `Course Planner/backend/frontend`. Import this repository into Vercel with the repository root as the **Root Directory** and the **Other** framework preset. The configured build command is a no-op; Vercel serves the frontend files directly.
+The included GitHub Actions workflow publishes the frontend from `Course Planner/backend/frontend` to GitHub Pages. In the repository, open **Settings → Pages**, set the build and deployment source to **GitHub Actions**, then push to `main` or run **Deploy static content to Pages** from the **Actions** tab. GitHub will show the published site URL in the workflow deployment.
 
-This static deployment uses browser `localStorage` for accounts and planner data. Data is limited to the current browser and does not sync between devices. The FastAPI backend stores accounts in a local JSON file and is not part of this Vercel deployment; use a persistent database and server-side authentication before offering shared or production accounts.
+This static deployment does not need Railway or a database. Signups and planner data are stored in the current browser only; they do not sync across devices and may be lost if browser storage is cleared. Use a unique password, not one used for other accounts. For shared accounts or cross-device storage, deploy a backend with a persistent database.
 
 ## 🚂 Deploy to Railway
 

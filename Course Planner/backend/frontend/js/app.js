@@ -352,7 +352,7 @@ async function postAuthApi(path, payload) {
   if (!API_BASE_URL) return { unavailable: true };
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), path === '/api/profile' ? 5000 : 1500);
+  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
       method: 'POST',
@@ -369,6 +369,9 @@ async function postAuthApi(path, payload) {
       error: data.detail || data.error || 'Request failed'
     };
   } catch (error) {
+    if (error.name === 'AbortError') {
+      return { unavailable: false, timedOut: true };
+    }
     return { unavailable: true };
   } finally {
     clearTimeout(timeout);
@@ -533,6 +536,10 @@ async function saveProfile() {
     showToast('Profile updated', 'success');
     return;
   }
+  if (apiResult.timedOut) {
+    showToast('The request timed out. Check your connection and try again.', 'error');
+    return;
+  }
   if (apiResult.status && !apiResult.unavailable) {
     showToast(apiResult.error, 'error');
     return;
@@ -631,6 +638,10 @@ async function signupStudent(event) {
     showToast('Account created and logged in', 'success');
     return;
   }
+  if (apiResult.timedOut) {
+    showToast('Sign up timed out. Try logging in before submitting again.', 'error');
+    return;
+  }
   if (apiResult.status === 409) {
     showToast('This student ID already has an account', 'error');
     document.getElementById('loginStudentId').value = id;
@@ -682,6 +693,10 @@ async function loginStudent(event) {
   }
   if (apiResult.status === 401) {
     showToast('Student ID or password does not match', 'error');
+    return;
+  }
+  if (apiResult.timedOut) {
+    showToast('Login timed out. Check your connection and try again.', 'error');
     return;
   }
   if (apiResult.status && !apiResult.unavailable) {
@@ -864,6 +879,10 @@ async function switchRememberedAccount(studentId) {
     closeModal();
     setActiveStudent(apiResult.data.student);
     showToast(`Switched to ${apiResult.data.student.name}`, 'success');
+    return;
+  }
+  if (apiResult.timedOut) {
+    showToast('Login timed out. Check your connection and try again.', 'error');
     return;
   }
   const apiError = apiResult.status && !apiResult.unavailable ? apiResult.error : null;
