@@ -529,7 +529,7 @@ async function saveProfile() {
   }
 
   const payload = { studentId: id, name, phone, password, profilePhoto };
-  const apiResult = await postAuthApi('/api/profile', payload);
+  const apiResult = await postAuthApi('/profile', payload);
   if (apiResult.ok) {
     updateActiveStudentProfile(apiResult.data.student, password || null);
     closeModal();
@@ -631,7 +631,7 @@ async function signupStudent(event) {
     return;
   }
 
-  const apiResult = await postAuthApi('/api/signup', { name, email, studentId: id, password });
+  const apiResult = await postAuthApi('/signup', { name, email, studentId: id, password });
   if (apiResult.ok) {
     setActiveStudent(apiResult.data.student);
     openRememberAccountPrompt(apiResult.data.student, password);
@@ -684,7 +684,7 @@ async function loginStudent(event) {
     return;
   }
 
-  const apiResult = await postAuthApi('/api/login', { studentId: id, password });
+  const apiResult = await postAuthApi('/login', { studentId: id, password });
   if (apiResult.ok) {
     setActiveStudent(apiResult.data.student);
     openRememberAccountPrompt(apiResult.data.student, password);
@@ -874,7 +874,7 @@ async function switchRememberedAccount(studentId) {
     return;
   }
 
-  const apiResult = await postAuthApi('/api/login', { studentId: account.id, password: account.password });
+  const apiResult = await postAuthApi('/login', { studentId: account.id, password: account.password });
   if (apiResult.ok) {
     closeModal();
     setActiveStudent(apiResult.data.student);
