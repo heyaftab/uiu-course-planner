@@ -3,12 +3,10 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-// IMPORTANT: Railway provides the PORT environment variable.
-// We MUST use process.env.PORT for Railway to route traffic to us.
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(__dirname, 'data');
 const STUDENTS_FILE = path.join(DATA_DIR, 'students.json');
-const FRONTEND_DIR = path.join(__dirname, '../frontend');
+const FRONTEND_DIR = path.resolve(__dirname, '..', 'frontend');
 
 function ensureDataFile() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -37,12 +35,10 @@ function readBody(req) {
 }
 
 function sendJson(res, status, payload) {
-  res.writeHead(status, {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
-  });
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.writeHead(status, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(payload));
 }
 
@@ -63,7 +59,7 @@ function serveFile(res, filePath, contentType) {
   fs.readFile(filePath, (err, data) => {
     if (err) {
       res.writeHead(404);
-      res.end('File Not Found: ' + filePath);
+      res.end('File Not Found on Server: ' + filePath);
       return;
     }
     res.writeHead(200, { 'Content-Type': contentType });
@@ -79,11 +75,10 @@ const server = http.createServer(async (req, res) => {
 
   const url = req.url || '';
 
-  // 1. API Routes
   if (url.startsWith('/api')) {
     try {
       if (req.method === 'GET' && (url === '/api' || url === '/api/info')) {
-        sendJson(res, 200, { name: 'UIU Course Planner API', status: 'running', port: PORT });
+        sendJson(res, 200, { name: 'UIU Course Planner API', status: 'running' });
         return;
       }
       if (req.method === 'POST' && url === '/api/signup') {
@@ -103,6 +98,7 @@ const server = http.createServer(async (req, res) => {
         sendJson(res, 201, { student: { id, name } });
         return;
       }
+      if (req.// API Routes
       if (req.method === 'POST' && url === '/api/login') {
         const { studentId, password } = await readBody(req);
         const id = String(studentId || '').trim();
@@ -140,8 +136,11 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // 2. Static Frontend Files
   let relativePath = url === '/' ? 'index.html' : url;
+  if (relativePath.startsWith('/')) {
+    relativePath = relativePath.substring(1);
+  }
+  
   let filePath = path.join(FRONTEND_DIR, relativePath);
   
   let contentType = 'text/html';
