@@ -7,8 +7,7 @@ const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(__dirname, 'data');
 const STUDENTS_FILE = path.join(DATA_DIR, 'students.json');
 
-// FIXED: Ensure we point exactly to where the frontend folder is relative to this file
-const FRONTEND_DIR = path.join(__dirname, '..', 'frontend');
+const FRONTEND_DIR = path.join(__dirname, 'frontend');
 
 function ensureDataFile() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });

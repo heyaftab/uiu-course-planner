@@ -230,9 +230,13 @@ Run the activation command **between steps 2 and 3**.
 
 ## ☁️ Deploy to Vercel
 
-The repository includes a `vercel.json` that publishes the static frontend from `Course Planner/frontend`. Import this repository into Vercel with the repository root as the **Root Directory** and the **Other** framework preset. The configured build command is a no-op; Vercel serves the frontend files directly.
+The repository includes a `vercel.json` that publishes the static frontend from `Course Planner/backend/frontend`. Import this repository into Vercel with the repository root as the **Root Directory** and the **Other** framework preset. The configured build command is a no-op; Vercel serves the frontend files directly.
 
 This static deployment uses browser `localStorage` for accounts and planner data. Data is limited to the current browser and does not sync between devices. The FastAPI backend stores accounts in a local JSON file and is not part of this Vercel deployment; use a persistent database and server-side authentication before offering shared or production accounts.
+
+## 🚂 Deploy to Railway
+
+Set the Railway service **Root Directory** to `Course Planner/backend`. This folder contains both the Node server and its `frontend` files, so Railway can package and serve the page and its assets together. Railway uses the `start` script in `package.json` and provides the listening port through `PORT`.
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" alt="divider" />
 
